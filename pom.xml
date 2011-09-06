@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  
+  <artifactId>monitoringservlet</artifactId>
+  <packaging>jar</packaging>
+  
+  <name>Monitoring Servlet</name>
+  
+  <parent>
+    <artifactId>pstools-parent</artifactId>
+    <groupId>com.polopoly.ps.pstools</groupId>
+    <version>10.2.0-fp3-r59278-1-SNAPSHOT</version>
+    <relativePath>../pstools-parent/pom.xml</relativePath>
+  </parent>
+
+  <profiles>
+    <profile>
+      <id>default-tools.jar</id>
+      <activation>
+        <property>
+          <name>java.vendor</name>
+          <value>Sun Microsystems Inc.</value>
+        </property>
+      </activation>
+    </profile>
+  </profiles>
+
+  <dependencies>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>1.9.1</version>
+    </dependency>
+    <dependency>
+      <groupId>jboss</groupId>
+      <artifactId>jboss-j2ee</artifactId>
+      <version>4.0.5.GA</version>
+    </dependency>
+  </dependencies>
+</project>

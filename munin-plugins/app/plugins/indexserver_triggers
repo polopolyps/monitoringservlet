@@ -1,0 +1,16 @@
+#!/bin/sh
+#!/bin/bash
+
+if [ "$1" = "config" ]; then
+        echo "graph_title Indexserver Processed Triggers";
+        echo "graph_vlabel triggers";
+        echo "triggers.label trigger";
+        echo "triggers.type DERIVE";
+	echo "triggers.min 0";
+	echo "graph_category Indexserver";
+else
+	RDIR=`dirname $0`
+        HOST=`hostname | cut -d . -f1`
+	triggers=`java -cp $RDIR/nagiosjmxquery.jar org.nagios.JMXQuery -U service:jmx:rmi://localhost:0/jndi/rmi://localhost:1199/mbeanserver_indexserver -O com.polopoly:application=indexserver,host=$HOST,module=indexserver,name=indexserver -A ProcessedTriggers | cut -d = -f 2`
+	echo "triggers.value $triggers"
+fi

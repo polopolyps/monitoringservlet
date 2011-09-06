@@ -1,0 +1,49 @@
+#!/usr/bin/perl 
+
+# Plots the heap usage of the Tomcat process using the command jmap -heap.
+
+if ($ARGV[0] eq "config") {
+	print "graph_title Tomcat Memory\n";
+	print "graph_vlabel bytes\n";
+	print "max.label max\n";
+	print "total.label total\n";
+	print "used.label used\n";
+	print "graph_category Tomcat\n";
+	exit 0;
+}
+
+$pid=`ps -eo pid:10,args | grep "org.apache.catalina.startup.Bootstrap" | grep -v grep | cut -c 1-10`;
+
+if ( $pid == 0) {
+	print "Could not get Tomcat PID.";
+	exit 1;
+}
+
+@jmap = `jmap -heap $pid`;
+
+if ( $? > 0 ) {
+        $user= `whoami`;
+        chomp($user);
+        print "Error calling jmap. Make sure the current user $user can contact the server process.";
+        exit 1;
+}
+
+foreach (@jmap) {
+	if (/PS Perm/) {
+		last;
+	}
+	if (/MaxHeapSize += (\d+)/) {
+		$max = $1;
+	}
+        if (/free += (\d+)/) {
+		$free += $1;
+	}
+        if (/used += (\d+)/) {
+                $used += $1;
+        }
+}
+
+print "max.value $max\n";
+print "total.value " . ($free + $used) . "\n";
+print "used.value $used\n";
+

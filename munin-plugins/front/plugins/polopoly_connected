@@ -1,0 +1,55 @@
+#!/usr/bin/perl 
+
+# Plots the connection status of index server, statistics server and CM server from the client
+
+$jmxpass = $ENV{jmxpass};
+$jmxuser = $ENV{jmxuser};
+$jmxport = $ENV{jmxport};
+
+if (!$jmxport) {
+	$jmxport = 1616;
+}
+
+if ($ARGV[0] eq "config") {
+        print "graph_title Modules Connected\n";
+        print "graph_vlabel connected\n";
+        print "graph_args --lower-limit 0 --upper-limit 1\n";
+	print "indexserver.label Index Server\n";
+	print "statisticsserver.label Statistics Server\n";
+        print "cm.label CM\n";
+	print "graph_category Polopoly\n";
+        exit 0;
+}
+
+`hostname` =~ /(.*?)\./;
+
+$hostname = $1;
+
+$mbeanprefix = "com.polopoly:application=front";
+$mbeansuffix = "name=Control StatusString";
+
+if (!$jmxuser) {
+	$jmxuser = "monitorRole";
+}
+
+if (!$jmxpass) {
+	die "The environment variable jmxpass needs to contain the password of JMX user $jmxuser. Set this in plugin-config.d/munin-node.";
+}
+
+$dirname = `dirname $0`;
+chomp ($dirname);
+
+$cmdprefix = "/usr/local/java/bin/java -jar $dirname/cmdline-jmxclient-0.10.3.jar $jmxuser:$jmxpass localhost:$jmxport";
+
+$result = `$cmdprefix $mbeanprefix,component=rmiClient,host=$hostname,module=search,$mbeansuffix 2>&1`;
+$indexserver = (($result =~ /CONNECTED and SERVING/) ? 1 : 0);
+
+if ( $? ) {
+	print "Could not call the Mbean. Try running the command \"$cmdprefix\" manually to debug the cause. The error message was: $result";
+}
+
+$statisticsserver = ((`$cmdprefix $mbeanprefix,component=thinClient,host=$hostname,module=statistics,$mbeansuffix 2>&1` =~ /CONNECTED and SERVING/) ? 1 : 0);
+
+$cmserver = ((`$cmdprefix $mbeanprefix,host=$hostname,$mbeansuffix 2>&1` =~ /CONNECTED and SERVING/) ? 1 : 0);
+
+print "indexserver.value $indexserver\nstatisticsserver.value $statisticsserver\ncm.value $cmserver\n";

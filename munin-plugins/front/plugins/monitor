@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+
+# Plots the uptime of the MonitoringServet. Note that the servlet must be packaged into the project manually.
+
+$url = $ENV{monitorurl};
+
+if (!$url) {
+    $url = "/monitor";
+}
+
+if ($ARGV[0] eq "config") {
+        print "graph_title Monitor URL\n";
+        print "graph_vlabel s\n";
+        print "monitor.label uptime\n";
+        print "time.label response time\n";
+        print "graph_args --lower-limit 0\n";
+        print "graph_category Polopoly";        
+        exit 0;
+}
+
+$host = `hostname`;
+chomp ($host);
+$_ = `curl -w '%{http_code} %{time_total}' http://$host$url -o /dev/null`;
+
+($http, $time) = split();
+
+print "monitor.value " . /200/ . "\ntime.value $time\n";

@@ -1,0 +1,64 @@
+#!/usr/bin/perl 
+
+# Plots the number of accesses to the content caches (assumes the front application is a PAF application).
+
+$jmxpass = $ENV{jmxpass};
+$jmxuser = $ENV{jmxuser};
+$jmxport = $ENV{jmxport};
+
+if (!$jmxport) {
+	$jmxport = 1616;
+}
+
+if ($ARGV[0] eq "config") {
+        print "graph_title Content Cache\n";
+        print "graph_vlabel hits/misses\n";
+	print "graph_args --logarithmic\n";
+        print "memhits.label Memory hits\n";
+        print "memhits.type DERIVE\n";
+	print "persisthits.label Persistent cache hits\n";
+	print "persisthits.type DERIVE\n";
+        print "persistmisses.label Persistent cache misses\n";
+        print "persistmisses.type DERIVE\n";
+	print "graph_category Polopoly\n";
+        exit 0;
+}
+
+$pid=`ps -eo pid:10,args | grep "/java -Dmodule.name=statisticsserver" | grep -v grep | cut -c 1-10`;
+
+`hostname` =~ /(.*?)\./;
+
+$hostname = $1;
+
+$mbeanprefix = "com.polopoly:application=front,component=client,detailLevel=FINE,group=ContentCache,host=$hostname,module=cm,name";
+
+if (!$jmxuser) {
+	$jmxuser = "monitorRole";
+}
+
+if (!$jmxpass) {
+	die "The environment variable jmxpass needs to contain the password of JMX user $jmxuser. Set this in plugin-config.d/munin-node.";
+}
+
+$dirname = `dirname $0`;
+chomp ($dirname);
+
+$cmdprefix = "/usr/local/java/bin/java -jar $dirname/cmdline-jmxclient-0.10.3.jar $jmxuser:$jmxpass localhost:$jmxport";
+
+$result = `$cmdprefix $mbeanprefix=MemoryContentDataCache ContentDataHits 2>&1`;
+$result =~ /: (\d*)/;
+$memhits = $1;
+
+if ( $? ) {
+	print "Could not call the Mbean. Try running the command \"$cmdprefix\" manually to debug the cause. The error message was: $result";
+}
+
+if (`$cmdprefix $mbeanprefix=PersistentContentDataCache ContentDataHits 2>&1` =~ /: (\d*)/) {
+	$persisthits = $1;
+}
+
+if (`$cmdprefix $mbeanprefix=PersistentContentDataCache ContentDataMisses 2>&1` =~ /: (\d*)/) {
+	$persistmisses = $1;
+}
+
+print "memhits.value $memhits\npersisthits.value $persisthits\npersistmisses.value $persistmisses\n";

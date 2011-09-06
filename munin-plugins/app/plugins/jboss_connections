@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if [ "$1" = "config" ]; then
+        echo "graph_title Database Connections In Use";
+        echo "graph_vlabel connections";
+        echo "connections.label connections";
+	echo "graph_args --lower-limit 0 --upper-limit 5";
+	echo "graph_category JBoss";
+else
+	connections=`$jbosshome/bin/twiddle.sh -s localhost get "jboss.jca:name=jdbc/PolopolyDB,service=ManagedConnectionPool" InUseConnectionCount`
+
+	echo connections.value ${connections#InUseConnectionCount=*}
+fi
+

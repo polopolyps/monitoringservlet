@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ "$1" = "config" ]; then
+        echo "graph_title Free Memory";
+        echo "graph_vlabel bytes";
+        echo "max.label max";
+	echo "total.label total";
+	echo "used.label used";
+	echo "graph_args --lower-limit 0";
+	echo "graph_category JBoss";
+else
+	connections=`/usr/local/jboss/bin/twiddle.sh -s app.collegepublisher.com get "jboss.system:type=ServerInfo" FreeMemory`
+
+	free=${connections#FreeMemory=*}
+
+        connections=`/usr/local/jboss/bin/twiddle.sh -s app.collegepublisher.com get "jboss.system:type=ServerInfo" MaxMemory`
+        echo max.value ${connections#MaxMemory=*}
+
+        connections=`/usr/local/jboss/bin/twiddle.sh -s app.collegepublisher.com get "jboss.system:type=ServerInfo" TotalMemory`
+	total=${connections#TotalMemory=*}
+        echo total.value ${total}
+
+	echo used.value $(($total - $free))
+fi
+

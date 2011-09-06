@@ -1,0 +1,19 @@
+[jmx_*]
+env.jmxurl service:jmx:rmi:///jndi/rmi://localhost:8181/jmxrmi
+env.jmxuser monitorRole
+env.jmxpass pi4wnew
+
+[monitor]
+# This is the URL the MonitorServlet is published on the front servers
+env.monitorurl /monitor
+
+[polopoly_*]
+# The password of the monitorRole JMX user
+env.jmxpass jmxpassword
+# The JMX port Tomcat is bound to.
+env.jmxport 1616
+
+[tomcat_*]
+# Must be root or same user as the web server is running as since jmap won't connect otherwise
+user root
+

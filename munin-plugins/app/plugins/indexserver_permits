@@ -1,0 +1,25 @@
+#!/bin/sh
+#!/bin/bash
+
+if [ "$1" = "config" ]; then
+        echo "graph_title Indexserver Permits";
+        echo "graph_vlabel permigs";
+        echo "running.label trigger";
+	echo "max.label max";
+	echo "waiting.label waiting";
+	echo "max.min 0";
+	echo "waiting.min 0";
+	echo "running.min 0";
+	echo "graph_category Indexserver";
+else
+	RDIR=`dirname $0`
+	HOST=`hostname | cut -d . -f1`
+	permits=`java -cp $RDIR/nagiosjmxquery.jar org.nagios.JMXQuery -U service:jmx:rmi://localhost:0/jndi/rmi://localhost:1199/mbeanserver_indexserver -O com.polopoly:application=indexserver,host=$HOST,module=indexserver,name=indexserver -A Permits | cut -d = -f 2`
+	max_permits=`java -cp $RDIR/nagiosjmxquery.jar org.nagios.JMXQuery -U service:jmx:rmi://localhost:0/jndi/rmi://localhost:1199/mbeanserver_indexserver -O com.polopoly:application=indexserver,host=$HOST,module=indexserver,name=indexserver -A MaxPermits | cut -d = -f 2`
+        waiting=`java -cp $RDIR/nagiosjmxquery.jar org.nagios.JMXQuery -U service:jmx:rmi://localhost:0/jndi/rmi://localhost:1199/mbeanserver_indexserver -O com.polopoly:application=indexserver,host=$HOST,module=indexserver,name=indexserver -A Queued | cut -d = -f 2`
+
+	echo "max.value $max_permits"
+	echo "waiting.value $waiting"
+	echo "running.value $(($max_permits - $permits))"
+
+fi

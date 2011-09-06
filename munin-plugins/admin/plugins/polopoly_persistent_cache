@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+
+$jmxpass = $ENV{jmxpass};
+$jmxuser = $ENV{jmxuser};
+$jmxurl = $ENV{jmxurl};
+$jmxport = $ENV{jmxport};
+
+if (!$jmxport) {
+        $jmxport = 1616;
+}
+
+if ($ARGV[0] eq "config") {
+        print "graph_title Persistent Cache Size\n";
+        print "graph_vlabel entries\n";
+        print "size.label Entries\n";
+        print "graph_category Polopoly\n";
+        exit 0;
+}
+
+`hostname` =~ /(.*?)\./;
+
+$hostname = $1;
+
+$mbeanprefix = "com.polopoly:application=polopoly,component=polopolycmclient,detailLevel";
+
+if (!$jmxuser) {
+        $jmxuser = "monitorRole";
+}
+
+if (!$jmxpass) {
+        die "The environment variable jmxpass needs to contain the password of JMX user $jmxuser. Set this in plugin-config.d/munin-node.";
+}
+
+$dirname = `dirname $0`;
+chomp ($dirname);
+
+$cmdprefix = "/usr/local/java/bin/java -jar $dirname/cmdline-jmxclient-0.10.3.jar $jmxuser:$jmxpass localhost:$jmxport";
+
+$result = `$cmdprefix $mbeanprefix=FINE,group=ContentCache,host=$hostname,module=cm,name=PersistentContentDataCache NumberOfStoredContentDatas 2>&1`;
+
+$result =~ /: (\d*)/;
+$size = $1;
+
+if ( $? ) {
+        print "Could not call the Mbean. Try running the command \"$cmdprefix\" manually to debug the cause. The error message was: $result";
+}
+
+print "size.value $size\n";

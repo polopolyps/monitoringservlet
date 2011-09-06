@@ -1,0 +1,62 @@
+#!/usr/bin/perl 
+
+$jmxpass = $ENV{jmxpass};
+$jmxuser = $ENV{jmxuser};
+$jmxurl = $ENV{jmxurl};
+$jmxport = $ENV{jmxport};
+
+if (!$jmxport) {
+        $jmxport = 1616;
+}
+
+if ($ARGV[0] eq "config") {
+        print "graph_title Cache Sizes\n";
+        print "graph_vlabel entries\n";
+        print "policysize.label Policy Cache Size\npolicymax.label Policy Cache Capacity\n";
+        print "contentsize.label Content Cache Size\ncontentmax.label Content Cache Capacity\n";
+        print "graph_category Polopoly\n";
+        exit 0;
+}
+
+$pid=`ps -eo pid:10,args | grep "/java -Dmodule.name=statisticsserver" | grep -v grep | cut -c 1-10`;
+
+`hostname` =~ /(.*?)\./;
+
+$hostname = $1;
+
+$mbeanprefix = "com.polopoly:application=front,component=client,detailLevel";
+
+if (!$jmxuser) {
+        $jmxuser = "monitorRole";
+}
+
+if (!$jmxpass) {
+        die "The environment variable jmxpass needs to contain the password of JMX user $jmxuser. Set this in plugin-config.d/munin-node.";
+}
+
+$dirname = `dirname $0`;
+chomp ($dirname);
+
+$cmdprefix = "/usr/local/java/bin/java -jar $dirname/cmdline-jmxclient-0.10.3.jar $jmxuser:$jmxpass localhost:$jmxport";
+
+$result = `$cmdprefix $mbeanprefix=INFO,group=PolicyCMServer,host=$hostname,module=cm,name=PolicyCache PolicyCacheMaxSize 2>&1`;
+$result =~ /: (\d*)/;
+$policymax = $1;
+
+if ( $? ) {
+        print "Could not call the Mbean. Try running the command \"$cmdprefix\" manually to debug the cause. The error message was: $result";
+}
+
+if (`$cmdprefix $mbeanprefix=INFO,group=PolicyCMServer,host=$hostname,module=cm,name=PolicyCache PolicyCacheSize 2>&1` =~ /: (\d*)/) {
+        $policysize = $1;
+}
+
+if (`$cmdprefix $mbeanprefix=FINE,group=ContentCache,host=$hostname,module=cm,name=MemoryContentDataCache NumberOfStoredContentDatas 2>&1` =~ /: (\d*)/) {
+        $contentsize = $1;
+}
+ 
+if (`$cmdprefix $mbeanprefix=CONFIG,host=$hostname,module=cm,name=ContentCacheSettings ContentMemoryCacheSize 2>&1` =~ /: (\d*)/) {
+        $contentmax = $1;
+}
+
+print "policysize.value $policysize\npolicymax.value $policymax\ncontentsize.value $contentsize\ncontentmax.value $contentmax\n";

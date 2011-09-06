@@ -1,0 +1,42 @@
+#!/usr/bin/perl 
+
+if ($ARGV[0] eq "config") {
+        print "graph_title Indexserver GC\n";
+        print "graph_vlabel ms\n";
+        print "gctime.label GC\n";
+        print "fgctime.label Full GC\n";
+        print "gctime.type DERIVE\n";
+        print "gctime.min 0\n";
+        print "fgctime.type DERIVE\n";
+        print "fgctime.min 0\n";
+        print "graph_category Indexserver\n";
+        exit 0;
+}
+
+$pid=`ps -eo pid:10,args | grep "/java -Dmodule.name=indexserver" | grep -v grep | cut -c 1-10`;
+
+if ( $pid == 0) {
+        print "Could not get indexserver PID.";
+        exit 1;
+}
+
+@jstat = `jstat -gcutil $pid`;
+
+if ( $? > 0 ) {
+        $user= `whoami`;
+        chomp($user);
+        print "Error calling jstat. Make sure the current user $user can contact the server process and that the JDK is in the PATH.";
+        exit 1;
+}
+
+@fields = split(/ +/, $jstat[1]);
+
+$gctime = $fields[10];
+chomp ($gctime);
+$gctime = int($gctime * 1000);
+$fgctime = $fields[9];
+chomp ($fgctime);
+$fgctime = int($fgctime * 1000);
+
+print "gctime.value $gctime\nfgctime.value $fgctime\n";
+

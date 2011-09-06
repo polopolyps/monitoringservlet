@@ -1,0 +1,14 @@
+[indexserver_*]
+# Must be either root or the user JBoss is running as
+user root
+
+[statisticsserver_*]
+# Must be either root or the user JBoss is running as
+user root
+
+[jboss_gc]
+# Must be either root or the user JBoss is running as
+user root
+
+[commitcount]
+user munin
