@@ -2,18 +2,17 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   
+  <groupId>com.polopoly.ps.tools</groupId>
   <artifactId>monitoringservlet</artifactId>
+  <version>2.0</version>
   <packaging>jar</packaging>
   
   <name>Monitoring Servlet</name>
   
-  <parent>
-    <artifactId>pstools-parent</artifactId>
-    <groupId>com.polopoly.ps.tools</groupId>
-    <version>10.5-DR3-SNAPSHOT-2</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
-
+  <properties>
+  	<polopoly.version>10.5-DR3-SNAPSHOT</polopoly.version>
+  </properties>
+  
   <profiles>
     <profile>
       <id>default-tools.jar</id>
@@ -30,7 +29,7 @@
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
-      <scope>provided</scope>
+      <version>2.4</version>
     </dependency>
     <dependency>
       <groupId>org.apache.lucene</groupId>
@@ -41,6 +40,11 @@
       <groupId>jboss</groupId>
       <artifactId>jboss-j2ee</artifactId>
       <version>4.0.5.GA</version>
+    </dependency>
+     <dependency>
+      <groupId>com.polopoly</groupId>
+      <artifactId>polopoly</artifactId>
+      <version>${polopoly.version}</version>
     </dependency>
   </dependencies>
 </project>
