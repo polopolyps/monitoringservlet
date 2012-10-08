@@ -21,6 +21,23 @@
     </profile>
   </profiles>
 
+  <distributionManagement>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>professional-services</id>
+      <name>Professional Services</name>
+      <url>http://maven.polopoly.com/nexus/content/repositories/professional-services</url>
+      <layout>default</layout>
+    </repository>
+    <snapshotRepository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>professional-services-snapshots</id>
+      <name>Professional Services Snapshots</name>
+      <url>http://maven.polopoly.com/nexus/content/repositories/professional-services-snapshots</url>
+      <layout>default</layout>
+    </snapshotRepository>
+  </distributionManagement>
+
   <dependencies>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -40,7 +57,8 @@
      <dependency>
       <groupId>com.polopoly</groupId>
       <artifactId>polopoly</artifactId>
-      <version>${polopoly.version}</version>
+      <version>10.3-DR2-r59409</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 </project>
