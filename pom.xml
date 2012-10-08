@@ -9,10 +9,6 @@
   
   <name>Monitoring Servlet</name>
   
-  <properties>
-  	<polopoly.version>10.5-DR3-SNAPSHOT</polopoly.version>
-  </properties>
-  
   <profiles>
     <profile>
       <id>default-tools.jar</id>
